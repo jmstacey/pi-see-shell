@@ -18,6 +18,7 @@ cmd=$(pi --print -p \
   --no-tools \
   --no-extensions \
   --no-skills \
+  --no-context-files \
   --no-session \
   --thinking off \
   --system-prompt "$system_prompt" \

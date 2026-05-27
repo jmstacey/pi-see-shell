@@ -16,6 +16,7 @@ pi --print -p \
   --tools "read,write" \
   --no-extensions \
   --no-skills \
+  --no-context-files \
   --no-session \
   --system-prompt "$system_prompt" \
   "$*"

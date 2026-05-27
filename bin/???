@@ -28,6 +28,7 @@ answer="$(pi --print -p \
   --tools "read,web_search,url_extract,web_fetch,batch_web_fetch" \
   --no-extensions \
   --no-skills \
+  --no-context-files \
   --no-session \
   "$prompt")"
 ret=$?
