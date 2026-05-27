@@ -10,7 +10,7 @@ fi
 local system_prompt="You are a shell command suggestion engine running in ZSH on macOS. Output exactly one shell command — no explanation, no markdown, no backticks. Just the raw command on a single line."
 
 print -P ""
-print -P "%F{cyan}│ Generating command . . .%f"
+print -P "%F{cyan}│ Suggested command:%f"
 print -P ""
 
 local pi_model_args=()
