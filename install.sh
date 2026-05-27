@@ -28,6 +28,7 @@ if ! grep -Fq 'export PATH="$HOME/.pi/bin:$PATH"' "$ZSHRC" 2>/dev/null; then
     echo '# Optional: choose the Pi provider/model for pi-see-shell'
     echo '# export PI_SEE_SHELL_PROVIDER=openrouter'
     echo '# export PI_SEE_SHELL_MODEL=deepseek/deepseek-v4-flash'
+    echo '# export PI_SEE_SHELL_THINKING=off'
     echo "# end pi-see-shell"
   } >> "$ZSHRC"
 fi
@@ -52,11 +53,11 @@ fi
 echo "✓ Installed , ,, ,,, ? ?? and ??? to $BIN_DIR"
 echo
 echo "Your shell will now get a per-window PI_SEE_SHELL_SESSION_ID."
-echo "Set PI_SEE_SHELL_PROVIDER and PI_SEE_SHELL_MODEL to choose the Pi backend."
+echo "Set PI_SEE_SHELL_PROVIDER, PI_SEE_SHELL_MODEL, and PI_SEE_SHELL_THINKING to tune Pi."
 echo "Open a new terminal or source ~/.zshrc to activate changes in this shell."
 echo
 echo "💡 Pro tip: Create a lightweight pi profile to keep startup fast."
 echo "   A minimal profile with no extensions loads much quicker — ideal for"
 echo "   quick command lookups and one-shot questions. In that profile, set"
 echo "   your preferred model and provider for low-latency responses, or set"
-echo '   PI_SEE_SHELL_PROVIDER and PI_SEE_SHELL_MODEL in ~/.zshrc.'
+echo '   PI_SEE_SHELL_PROVIDER, PI_SEE_SHELL_MODEL, and PI_SEE_SHELL_THINKING in ~/.zshrc.'

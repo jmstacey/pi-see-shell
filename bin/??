@@ -41,7 +41,7 @@ answer="$(pi --print -p \
   --no-themes \
   --no-session \
   --offline \
-  --thinking off \
+  --thinking "${PI_SEE_SHELL_THINKING:-off}" \
   "$prompt")"
 ret=$?
 
