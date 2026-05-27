@@ -53,11 +53,14 @@ fi
 echo "✓ Installed , ,, ,,, ? ?? and ??? to $BIN_DIR"
 echo
 echo "Your shell will now get a per-window PI_SEE_SHELL_SESSION_ID."
-echo "Set PI_SEE_SHELL_PROVIDER, PI_SEE_SHELL_MODEL, and PI_SEE_SHELL_THINKING to tune Pi."
 echo "Open a new terminal or source ~/.zshrc to activate changes in this shell."
 echo
-echo "💡 Pro tip: Create a lightweight pi profile to keep startup fast."
-echo "   A minimal profile with no extensions loads much quicker — ideal for"
-echo "   quick command lookups and one-shot questions. In that profile, set"
-echo "   your preferred model and provider for low-latency responses, or set"
-echo '   PI_SEE_SHELL_PROVIDER, PI_SEE_SHELL_MODEL, and PI_SEE_SHELL_THINKING in ~/.zshrc.'
+echo "Configuration environment variables:"
+echo "  PI_SEE_SHELL_PROVIDER   Optional Pi provider, e.g. openrouter"
+echo "  PI_SEE_SHELL_MODEL      Optional Pi model, e.g. deepseek/deepseek-v4-flash"
+echo "  PI_SEE_SHELL_THINKING   Optional thinking level, defaults to off"
+echo
+echo "Examples for ~/.zshrc:"
+echo "  export PI_SEE_SHELL_PROVIDER=openrouter"
+echo "  export PI_SEE_SHELL_MODEL=deepseek/deepseek-v4-flash"
+echo "  export PI_SEE_SHELL_THINKING=off"
