@@ -8,7 +8,7 @@ if ! command -v pi &>/dev/null; then
 fi
 [[ $# -eq 0 ]] && { echo "Usage: ??? <question>" >&2; exit 1; }
 
-local qdir="$HOME/.questions"
+local qdir="$HOME/.pi-see-shell"
 [[ -d "$qdir" ]] || mkdir -p "$qdir"
 
 local session_file="$qdir/.q_session"

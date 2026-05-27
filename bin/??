@@ -6,7 +6,7 @@ if ! command -v pi &>/dev/null; then
 fi
 [[ $# -eq 0 ]] && { echo "Usage: ?? <follow-up question>" >&2; exit 1; }
 
-local session_file="$HOME/.questions/.q_session"
+local session_file="$HOME/.pi-see-shell/.q_session"
 
 if [[ ! -f "$session_file" ]]; then
   print -P "%F{red}✗ No active session. Start one with: ? <question>%f" >&2
