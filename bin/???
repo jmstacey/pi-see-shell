@@ -1,0 +1,36 @@
+#!/usr/bin/env zsh
+# Ask a question and get an exhaustive, thorough answer.
+# Uses Pi with read and web tools. No Bash tool.
+# Starts a fresh session. Use ?? to follow up.
+
+if ! command -v pi &>/dev/null; then
+  echo "✗ 'pi' not found." >&2; exit 1
+fi
+[[ $# -eq 0 ]] && { echo "Usage: ??? <question>" >&2; exit 1; }
+
+local qdir="$HOME/.questions"
+[[ -d "$qdir" ]] || mkdir -p "$qdir"
+
+local session_file="$qdir/.q_session"
+rm -f "$session_file"
+
+local system_prompt="You are a thorough, exhaustive research assistant in a macOS terminal. Give a comprehensive, detailed answer. Cover edge cases, nuances, alternatives, and follow-on considerations. Use web search and file reading to gather full context before answering. Do not run bash commands."
+
+print -P ""
+print -P "%F{cyan}┌─────────────────────────────────────────────%f"
+print -P "%F{cyan}│ ???%f %F{yellow}$*%f"
+print -P "%F{cyan}└─────────────────────────────────────────────%f"
+print -P ""
+
+pi --print -p \
+  --system-prompt "$system_prompt" \
+  --tools "read,web_search,url_extract,web_fetch,batch_web_fetch" \
+  --no-extensions \
+  --no-skills \
+  --session "$session_file" \
+  "$*"
+
+local ret=$?
+print -P ""
+[[ $ret -ne 0 ]] && print -P "%F{red}✗ Failed.%f"
+exit $ret

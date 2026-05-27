@@ -15,9 +15,10 @@ cp "bin/,,"  "$BIN_DIR/,,"
 cp "bin/,,," "$BIN_DIR/,,,"
 cp "bin/?"   "$BIN_DIR/?"
 cp "bin/??"  "$BIN_DIR/??"
-chmod +x "$BIN_DIR/," "$BIN_DIR/,," "$BIN_DIR/,,," "$BIN_DIR/?" "$BIN_DIR/??"
+cp "bin/???" "$BIN_DIR/???"
+chmod +x "$BIN_DIR/," "$BIN_DIR/,," "$BIN_DIR/,,," "$BIN_DIR/?" "$BIN_DIR/??" "$BIN_DIR/???"
 
-echo "✓ Installed , ,, ,,, ? and ?? to $BIN_DIR"
+echo "✓ Installed , ,, ,,, ? ?? and ??? to $BIN_DIR"
 echo
 echo "Add this to your ~/.zshrc if not already present:"
 echo '  export PATH="$HOME/.pi/bin:$PATH"'
