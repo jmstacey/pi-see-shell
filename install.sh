@@ -2,6 +2,7 @@
 
 PI_DIR="$HOME/.pi"
 BIN_DIR="$PI_DIR/bin"
+ZSHRC="$HOME/.zshrc"
 
 if [[ ! -d "$PI_DIR" ]]; then
   echo "✗ $PI_DIR not found. Is pi installed?" >&2
@@ -10,18 +11,45 @@ fi
 
 mkdir -p "$BIN_DIR"
 
-cp "bin/,"   "$BIN_DIR/,"
-cp "bin/,,"  "$BIN_DIR/,,"
+cp "bin/," "$BIN_DIR/,"
+cp "bin/,," "$BIN_DIR/,,"
 cp "bin/,,," "$BIN_DIR/,,,"
-cp "bin/?"   "$BIN_DIR/?"
-cp "bin/??"  "$BIN_DIR/??"
+cp "bin/?" "$BIN_DIR/?"
+cp "bin/??" "$BIN_DIR/??"
 cp "bin/???" "$BIN_DIR/???"
+cp "bin/.pi-see-shell-question.zsh" "$BIN_DIR/.pi-see-shell-question.zsh"
 chmod +x "$BIN_DIR/," "$BIN_DIR/,," "$BIN_DIR/,,," "$BIN_DIR/?" "$BIN_DIR/??" "$BIN_DIR/???"
+
+if ! grep -Fq 'export PATH="$HOME/.pi/bin:$PATH"' "$ZSHRC" 2>/dev/null; then
+  {
+    echo ""
+    echo "# pi-see-shell"
+    echo 'export PATH="$HOME/.pi/bin:$PATH"'
+    echo "# end pi-see-shell"
+  } >> "$ZSHRC"
+fi
+
+if ! grep -Fq 'PI_SEE_SHELL_SESSION_ID' "$ZSHRC" 2>/dev/null; then
+  {
+    echo ""
+    echo "# pi-see-shell session id"
+    echo 'if [[ -z "${PI_SEE_SHELL_SESSION_ID:-}" ]]; then'
+    echo '  if command -v uuidgen >/dev/null 2>&1; then'
+    echo '    export PI_SEE_SHELL_SESSION_ID="$(uuidgen)"'
+    echo '  elif command -v python3 >/dev/null 2>&1; then'
+    echo "    export PI_SEE_SHELL_SESSION_ID=\"\$(python3 -c 'import uuid; print(uuid.uuid4())')\""
+    echo '  else'
+    echo '    export PI_SEE_SHELL_SESSION_ID="$$"'
+    echo '  fi'
+    echo 'fi'
+    echo "# end pi-see-shell session id"
+  } >> "$ZSHRC"
+fi
 
 echo "✓ Installed , ,, ,,, ? ?? and ??? to $BIN_DIR"
 echo
-echo "Add this to your ~/.zshrc if not already present:"
-echo '  export PATH="$HOME/.pi/bin:$PATH"'
+echo "Your shell will now get a per-window PI_SEE_SHELL_SESSION_ID."
+echo "Open a new terminal or source ~/.zshrc to activate it in this shell."
 echo
 echo "💡 Pro tip: Create a lightweight pi profile to keep startup fast."
 echo "   A minimal profile with no extensions loads much quicker — ideal for"

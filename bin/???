@@ -1,20 +1,19 @@
 #!/usr/bin/env zsh
-# Ask a question and get an exhaustive, thorough answer.
-# Uses Pi with read and web tools. No Bash tool.
-# Starts a fresh session. Use ?? to follow up.
+# Ask a fresh, exhaustive read-only question.
 
 if ! command -v pi &>/dev/null; then
   echo "✗ 'pi' not found." >&2; exit 1
 fi
 [[ $# -eq 0 ]] && { echo "Usage: ??? <question>" >&2; exit 1; }
 
-local qdir="$HOME/.pi-see-shell"
-[[ -d "$qdir" ]] || mkdir -p "$qdir"
+source "${0:A:h}/.pi-see-shell-question.zsh"
 
-local session_file="$qdir/.q_session"
-rm -f "$session_file"
+pi_see_shell_write_mode exhaustive
+pi_see_shell_reset_transcript
+printf '%s' "$*" | pi_see_shell_append_turn user
 
-local system_prompt="You are a thorough, exhaustive research assistant in a macOS terminal. Give a comprehensive, detailed answer. Cover edge cases, nuances, alternatives, and follow-on considerations. Use web search and file reading to gather full context before answering. Do not run bash commands."
+local system_prompt
+system_prompt="$(pi_see_shell_system_prompt exhaustive)"
 
 print -P ""
 print -P "%F{cyan}┌─────────────────────────────────────────────%f"
@@ -22,15 +21,21 @@ print -P "%F{cyan}│ ???%f %F{yellow}$*%f"
 print -P "%F{cyan}└─────────────────────────────────────────────%f"
 print -P ""
 
-pi --print -p \
+local prompt answer ret
+prompt="$*"
+answer="$(pi --print -p \
   --system-prompt "$system_prompt" \
   --tools "read,web_search,url_extract,web_fetch,batch_web_fetch" \
   --no-extensions \
   --no-skills \
-  --session "$session_file" \
-  "$*"
+  --no-session \
+  "$prompt")"
+ret=$?
 
-local ret=$?
-print -P ""
-[[ $ret -ne 0 ]] && print -P "%F{red}✗ Failed.%f"
-exit $ret
+if [[ $ret -ne 0 ]]; then
+  print -P "%F{red}✗ Failed.%f"
+  exit $ret
+fi
+
+printf '%s' "$answer" | pi_see_shell_append_turn assistant
+print -r -- "$answer"

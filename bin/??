@@ -1,34 +1,44 @@
 #!/usr/bin/env zsh
-# Follow up on the last ? session in the same conversation.
+# Continue the previous question in the same shell session.
 
 if ! command -v pi &>/dev/null; then
   echo "✗ 'pi' not found." >&2; exit 1
 fi
 [[ $# -eq 0 ]] && { echo "Usage: ?? <follow-up question>" >&2; exit 1; }
 
-local session_file="$HOME/.pi-see-shell/.q_session"
+source "${0:A:h}/.pi-see-shell-question.zsh"
 
-if [[ ! -f "$session_file" ]]; then
-  print -P "%F{red}✗ No active session. Start one with: ? <question>%f" >&2
+local transcript_file
+transcript_file="$(pi_see_shell_transcript_path)"
+if [[ ! -f "$transcript_file" ]]; then
+  print -P "%F{red}✗ No active question. Start one with: ? <question>%f" >&2
   exit 1
 fi
 
-local system_prompt="You are a helpful, concise assistant in a macOS terminal. Answer clearly and accurately. Use web search or file reading when needed. Do not run bash commands."
+local mode system_prompt prompt answer ret
+mode="$(pi_see_shell_read_mode)"
+system_prompt="$(pi_see_shell_system_prompt "$mode")"
+prompt="$(pi_see_shell_followup_prompt "$*")"
+
+printf '%s' "$*" | pi_see_shell_append_turn user
 
 print -P ""
 print -P "%F{cyan}│ ??%f %F{yellow}$*%f"
 print -P ""
 
-pi --print -p \
+answer="$(pi --print -p \
   --system-prompt "$system_prompt" \
   --tools "read,web_search,url_extract,web_fetch,batch_web_fetch" \
   --no-extensions \
   --no-skills \
-  --session "$session_file" \
-  --continue \
-  "$*"
+  --no-session \
+  "$prompt")"
+ret=$?
 
-local ret=$?
-print -P ""
-[[ $ret -ne 0 ]] && print -P "%F{red}✗ Failed.%f"
-exit $ret
+if [[ $ret -ne 0 ]]; then
+  print -P "%F{red}✗ Failed.%f"
+  exit $ret
+fi
+
+printf '%s' "$answer" | pi_see_shell_append_turn assistant
+print -r -- "$answer"
