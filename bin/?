@@ -21,15 +21,24 @@ print -P "%F{cyan}│ ?%f %F{yellow}$*%f"
 print -P "%F{cyan}└─────────────────────────────────────────────%f"
 print -P ""
 
+local pi_model_args=()
+[[ -n "${PI_SEE_SHELL_PROVIDER:-}" ]] && pi_model_args+=(--provider "$PI_SEE_SHELL_PROVIDER")
+[[ -n "${PI_SEE_SHELL_MODEL:-}" ]] && pi_model_args+=(--model "$PI_SEE_SHELL_MODEL")
+
 local prompt answer ret
 prompt="$*"
 answer="$(pi --print -p \
+  "${pi_model_args[@]}" \
   --system-prompt "$system_prompt" \
   --tools "read,web_search,url_extract,web_fetch,batch_web_fetch" \
   --no-extensions \
   --no-skills \
   --no-context-files \
+  --no-prompt-templates \
+  --no-themes \
   --no-session \
+  --offline \
+  --thinking off \
   "$prompt")"
 ret=$?
 

@@ -12,11 +12,20 @@ print -P ""
 print -P "%F{cyan}│ File action:%f %F{yellow}$*%f"
 print -P ""
 
+local pi_model_args=()
+[[ -n "${PI_SEE_SHELL_PROVIDER:-}" ]] && pi_model_args+=(--provider "$PI_SEE_SHELL_PROVIDER")
+[[ -n "${PI_SEE_SHELL_MODEL:-}" ]] && pi_model_args+=(--model "$PI_SEE_SHELL_MODEL")
+
 pi --print -p \
+  "${pi_model_args[@]}" \
   --tools "read,write" \
   --no-extensions \
   --no-skills \
   --no-context-files \
+  --no-prompt-templates \
+  --no-themes \
   --no-session \
+  --offline \
+  --thinking off \
   --system-prompt "$system_prompt" \
   "$*"

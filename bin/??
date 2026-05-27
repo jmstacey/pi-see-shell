@@ -15,6 +15,10 @@ if [[ ! -f "$transcript_file" ]]; then
   exit 1
 fi
 
+local pi_model_args=()
+[[ -n "${PI_SEE_SHELL_PROVIDER:-}" ]] && pi_model_args+=(--provider "$PI_SEE_SHELL_PROVIDER")
+[[ -n "${PI_SEE_SHELL_MODEL:-}" ]] && pi_model_args+=(--model "$PI_SEE_SHELL_MODEL")
+
 local mode system_prompt prompt answer ret
 mode="$(pi_see_shell_read_mode)"
 system_prompt="$(pi_see_shell_system_prompt "$mode")"
@@ -27,12 +31,17 @@ print -P "%F{cyan}│ ??%f %F{yellow}$*%f"
 print -P ""
 
 answer="$(pi --print -p \
+  "${pi_model_args[@]}" \
   --system-prompt "$system_prompt" \
   --tools "read,web_search,url_extract,web_fetch,batch_web_fetch" \
   --no-extensions \
   --no-skills \
   --no-context-files \
+  --no-prompt-templates \
+  --no-themes \
   --no-session \
+  --offline \
+  --thinking off \
   "$prompt")"
 ret=$?
 
