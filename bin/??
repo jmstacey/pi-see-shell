@@ -1,0 +1,34 @@
+#!/usr/bin/env zsh
+# Follow up on the last ? session in the same conversation.
+
+if ! command -v pi &>/dev/null; then
+  echo "✗ 'pi' not found." >&2; exit 1
+fi
+[[ $# -eq 0 ]] && { echo "Usage: ?? <follow-up question>" >&2; exit 1; }
+
+local session_file="$HOME/.questions/.q_session"
+
+if [[ ! -f "$session_file" ]]; then
+  print -P "%F{red}✗ No active session. Start one with: ? <question>%f" >&2
+  exit 1
+fi
+
+local system_prompt="You are a helpful, concise assistant in a macOS terminal. Answer clearly and accurately. Use web search or file reading when needed. Do not run bash commands."
+
+print -P ""
+print -P "%F{cyan}│ ??%f %F{yellow}$*%f"
+print -P ""
+
+pi --print -p \
+  --system-prompt "$system_prompt" \
+  --tools "read,web_search,url_extract,web_fetch,batch_web_fetch" \
+  --no-extensions \
+  --no-skills \
+  --session "$session_file" \
+  --continue \
+  "$*"
+
+local ret=$?
+print -P ""
+[[ $ret -ne 0 ]] && print -P "%F{red}✗ Failed.%f"
+exit $ret

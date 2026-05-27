@@ -1,0 +1,40 @@
+#!/usr/bin/env zsh
+# Generate one command, preview it, confirm, then run it.
+# If output looks like a patch, preview the diff and confirm before applying.
+
+if ! command -v pi &>/dev/null; then
+  echo "✗ 'pi' not found." >&2; exit 1
+fi
+[[ $# -eq 0 ]] && { echo "Usage: ,, <describe what you want>" >&2; exit 1; }
+
+local system_prompt="You are a shell command suggestion engine running in ZSH on macOS. Output exactly one shell command — no explanation, no markdown, no backticks. Just the raw command on a single line."
+
+print -P ""
+print -P "%F{cyan}│ Generating:%f %F{yellow}$*%f"
+print -P ""
+
+local cmd
+cmd=$(pi --print -p \
+  --no-tools \
+  --no-extensions \
+  --no-skills \
+  --no-session \
+  --thinking off \
+  --system-prompt "$system_prompt" \
+  "$*" 2>/dev/null)
+
+[[ $? -ne 0 || -z "$cmd" ]] && { echo "✗ Failed." >&2; exit 1; }
+cmd="${cmd//\`/}"; cmd="${cmd## }"; cmd="${cmd%% }"
+
+if echo "$cmd" | grep -qE '^(---|\+\+\+|@@)'; then
+  print -P "%F{cyan}Patch preview:%f"
+  echo "$cmd"
+  print -nP "\n%F{cyan}Apply this patch? [y/N]%f "
+  read -r answer
+  [[ "$answer" =~ ^[Yy]$ ]] && echo "$cmd" | patch -p1 || print -P "%F{240}Aborted.%f"
+else
+  print -P "%F{yellow}▶ $cmd%f"
+  print -nP "\n%F{cyan}Run this? [y/N]%f "
+  read -r answer
+  [[ "$answer" =~ ^[Yy]$ ]] && eval "$cmd" || print -P "%F{240}Aborted.%f"
+fi

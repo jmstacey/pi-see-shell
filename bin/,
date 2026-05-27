@@ -1,48 +1,31 @@
 #!/usr/bin/env zsh
-# , — describe what you want and get a shell command suggestion
-#
-# Usage:  , <description>
-# Example:  , find the 5 largest files
-#
-# Generates one command, prints it, copies to clipboard (Cmd+V).
+# Propose one shell command or patch action. Nothing runs.
+# Run ,, to confirm and execute.
 
 if ! command -v pi &>/dev/null; then
-  echo "✗ 'pi' not found. Install: curl -fsSL https://pi.dev/install.sh | sh" >&2
-  exit 1
+  echo "✗ 'pi' not found." >&2; exit 1
 fi
+[[ $# -eq 0 ]] && { echo "Usage: , <describe what you want>" >&2; exit 1; }
 
-if [[ $# -eq 0 ]]; then
-  echo "Usage: , <description of what you want to do>" >&2
-  exit 1
-fi
-
-local desc="$*"
-
-# Ensure the questions working directory exists
-local qdir="$HOME/.questions"
-[[ -d "$qdir" ]] || mkdir -p "$qdir"
-cd "$qdir"
-
-local system_prompt="You are a shell command suggestion engine running in a ZSH terminal on macOS. Given the user's description of what they want to do, output exactly one shell command — the best one — with no numbering, no explanation, no markdown, no backticks. Just the raw command on a single line."
+local system_prompt="You are a shell command suggestion engine running in ZSH on macOS. Output exactly one shell command — no explanation, no markdown, no backticks. Just the raw command on a single line."
 
 print -P ""
-print -P "%F{cyan}│ Generating command for:%f %F{yellow}$desc%f"
+print -P "%F{cyan}│ Suggest:%f %F{yellow}$*%f"
 print -P ""
 
-local command
-command=$(pi --print -p --no-tools --thinking off \
-  --system-prompt "$system_prompt" "$desc" 2>/dev/null)
+local cmd
+cmd=$(pi --print -p \
+  --no-tools \
+  --no-extensions \
+  --no-skills \
+  --no-session \
+  --thinking off \
+  --system-prompt "$system_prompt" \
+  "$*" 2>/dev/null)
 
-if [[ $? -ne 0 || -z "$command" ]]; then
-  echo "✗ Failed." >&2
-  exit 1
-fi
+[[ $? -ne 0 || -z "$cmd" ]] && { echo "✗ Failed." >&2; exit 1; }
+cmd="${cmd//\`/}"; cmd="${cmd## }"; cmd="${cmd%% }"
 
-# Strip backticks just in case
-command="${command//\`/}"
-# Strip leading/trailing whitespace
-command="${command## }"
-command="${command%% }"
-
-echo -n "$command" | pbcopy
-echo "$command"
+echo -n "$cmd" | pbcopy
+print -P "%F{yellow}$cmd%f"
+print -P "\n%F{240}(copied — confirm and run with ,,)%f"

@@ -1,0 +1,21 @@
+#!/usr/bin/env zsh
+# Run one Pi read/edit/write action, then return control.
+
+if ! command -v pi &>/dev/null; then
+  echo "✗ 'pi' not found." >&2; exit 1
+fi
+[[ $# -eq 0 ]] && { echo "Usage: ,,, <what to read, edit, or write>" >&2; exit 1; }
+
+local system_prompt="You are a precise file editing assistant on macOS. Perform exactly ONE file action: read a file, edit a file, or write a file. Do that one action and stop. Do not chain operations or make multiple edits in one pass."
+
+print -P ""
+print -P "%F{cyan}│ File action:%f %F{yellow}$*%f"
+print -P ""
+
+pi --print -p \
+  --tools "read,write" \
+  --no-extensions \
+  --no-skills \
+  --no-session \
+  --system-prompt "$system_prompt" \
+  "$*"
