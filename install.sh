@@ -18,3 +18,9 @@ echo "✓ Installed , and q to $BIN_DIR"
 echo
 echo "Add this to your ~/.zshrc if not already present:"
 echo '  export PATH="$HOME/.pi/bin:$PATH"'
+echo
+echo "💡 Pro tip: Create a lightweight pi profile to keep startup fast."
+echo "   A minimal profile with no extensions loads much quicker — ideal for"
+echo "   quick command lookups and one-shot questions. In that profile, set"
+echo "   your preferred model and provider for low-latency responses"
+echo "   (e.g. a fast/free model like Gemini Flash or DeepSeek via OpenRouter)."
