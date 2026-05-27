@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # Propose one shell command or patch action. Nothing runs.
-# Run ,, to confirm and execute.
+# Paste or edit the copied command yourself before running.
 
 if ! command -v pi &>/dev/null; then
   echo "✗ 'pi' not found." >&2; exit 1
@@ -38,4 +38,4 @@ cmd="${cmd//\`/}"; cmd="${cmd//$'\n'/}"; cmd="${cmd//$'\r'/}"; cmd="${cmd## }"; 
 
 echo -n "$cmd" | pbcopy
 print -P "%F{yellow}$cmd%f"
-print -P "\n%F{240}(copied — confirm and run with ,,)%f"
+print -P "\n%F{240}(copied)%f"
