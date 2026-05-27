@@ -24,7 +24,7 @@ cmd=$(pi --print -p \
   "$*" 2>/dev/null)
 
 [[ $? -ne 0 || -z "$cmd" ]] && { echo "✗ Failed." >&2; exit 1; }
-cmd="${cmd//\`/}"; cmd="${cmd## }"; cmd="${cmd%% }"
+cmd="${cmd//\`/}"; cmd="${cmd//$'\n'/}"; cmd="${cmd//$'\r'/}"; cmd="${cmd## }"; cmd="${cmd%% }"
 
 echo -n "$cmd" | pbcopy
 print -P "%F{yellow}$cmd%f"
