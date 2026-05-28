@@ -309,6 +309,7 @@ pi_see_shell_build_pi_cmd() {
     --system-prompt "$system_prompt"
     --no-extensions
     -e "$(pi_see_shell_openrouter_preset_extension_path)"
+    -e "$(pi_see_shell_web_fetch_extension_path)"
     --tools "read,web_search,url_extract,web_fetch,batch_web_fetch"
     --no-skills
     --no-context-files
@@ -320,6 +321,10 @@ pi_see_shell_build_pi_cmd() {
     "$prompt"
   )
 }
+pi_see_shell_web_fetch_extension_path() {
+  printf '%s\n' "$HOME/.pi/profiles/dev/npm/node_modules/pi-smart-fetch/dist/index.js"
+}
+
 pi_see_shell_openrouter_preset_extension_path() {
   printf '%s\n' "$HOME/.pi/agent/extensions/openrouter-preset.ts"
 }
