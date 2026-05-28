@@ -5,7 +5,7 @@ A small zsh bridge for Pi.
 ## What it does
 - `q` asks Pi a question and prints the answer in your terminal.
 - `,` asks Pi for one shell command, copies it to the clipboard, and does not run it.
-- The installer also adds a zsh binding so `q` handles apostrophes and question marks cleanly.
+- The installer adds a zsh binding so `q` handles apostrophes and question marks cleanly.
 - Pi subprocesses stay lean: no skills, extensions, sessions, or prompt templates.
 
 ## Install
