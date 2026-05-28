@@ -6,7 +6,7 @@ _pi_see_shell_run_q_buffer() {
   emulate -L zsh
 
   local line="$BUFFER"
-  local cmd rest status
+  local cmd rest command_status
 
   if [[ "$line" =~ '^([[:space:]]*)((\./)?q{1,3})([[:space:]]+)(.*)$' ]]; then
     cmd="$match[2]"
@@ -15,22 +15,19 @@ _pi_see_shell_run_q_buffer() {
     # Preserve the clean, natural command in shell history.
     print -s -- "$line"
 
-    # Clear the edit buffer so zsh does not try to parse apostrophes or globs.
+    # Flush while the original buffer is still displayed, then clear it so zsh
+    # does not try to parse apostrophes or globs after this widget returns.
+    zle -I
     BUFFER=""
     CURSOR=0
 
-    # Flush the current edit line, then echo the clean command so it remains
-    # visible in the terminal without shell-escaped characters.
-    zle -I
-    print -P -n -- "${PROMPT:-%# }"
-    print -r -- "$line"
     "$cmd" "$rest"
-    status=$?
+    command_status=$?
     print -r -- ""
 
     # Show a fresh prompt without feeding the original buffer to zsh parsing.
     zle reset-prompt
-    return $status
+    return $command_status
   fi
 
   return 1
