@@ -24,6 +24,13 @@ print -P ""
 local pi_model_args=()
 [[ -n "${PI_SEE_SHELL_PROVIDER:-}" ]] && pi_model_args+=(--provider "$PI_SEE_SHELL_PROVIDER")
 [[ -n "${PI_SEE_SHELL_MODEL:-}" ]] && pi_model_args+=(--model "$PI_SEE_SHELL_MODEL")
+if [[ -n "${PI_SEE_SHELL_MODEL:-}" ]]; then
+  local pi_models_pattern="$PI_SEE_SHELL_MODEL"
+  if [[ -n "${PI_SEE_SHELL_PROVIDER:-}" && "$pi_models_pattern" != "$PI_SEE_SHELL_PROVIDER/"* ]]; then
+    pi_models_pattern="$PI_SEE_SHELL_PROVIDER/$pi_models_pattern"
+  fi
+  pi_model_args+=(--models "$pi_models_pattern")
+fi
 
 local prompt answer ret
 prompt="$*"
