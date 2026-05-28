@@ -34,6 +34,17 @@ if ! grep -Fq 'export PATH="$HOME/.pi/bin:$PATH"' "$ZSHRC" 2>/dev/null; then
   } >> "$ZSHRC"
 fi
 
+if ! grep -Fq "alias qq='noglob qq'" "$ZSHRC" 2>/dev/null; then
+  {
+    echo ""
+    echo "# pi-see-shell q glob protection"
+    echo "alias q='noglob q'"
+    echo "alias qq='noglob qq'"
+    echo "alias qqq='noglob qqq'"
+    echo "# end pi-see-shell q glob protection"
+  } >> "$ZSHRC"
+fi
+
 if ! grep -Fq 'PI_SEE_SHELL_SESSION_ID' "$ZSHRC" 2>/dev/null; then
   {
     echo ""
@@ -55,6 +66,7 @@ echo "✓ Installed , ,, q qq and qqq to $BIN_DIR"
 echo
 echo "Your shell will now get a per-window PI_SEE_SHELL_SESSION_ID."
 echo "Open a new terminal or source ~/.zshrc to activate changes in this shell."
+echo "The installer also adds noglob aliases so q/qq/qqq can accept question marks."
 echo
 echo "Configuration environment variables:"
 echo "  PI_SEE_SHELL_PROVIDER   Optional Pi provider, e.g. openrouter"
