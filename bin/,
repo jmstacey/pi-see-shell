@@ -7,7 +7,11 @@ if ! command -v pi &>/dev/null; then
 fi
 [[ $# -eq 0 ]] && { echo "Usage: , <describe what you want>" >&2; exit 1; }
 
-local system_prompt="You are a shell command suggestion engine running in ZSH on macOS. Output exactly one shell command — no explanation, no markdown, no backticks. Just the raw command on a single line."
+source "${0:A:h}/.pi-see-shell-question.zsh"
+
+local target_os
+target_os="$(pi_see_shell_target_os)"
+local system_prompt="Output exactly one shell command for ${target_os}. Use no numbering, no explanation, no markdown, no backticks. Just the raw command on a single line."
 
 print -P ""
 print -P "%F{cyan}│ Suggested command:%f"
@@ -17,24 +21,32 @@ local pi_model_args=()
 [[ -n "${PI_SEE_SHELL_PROVIDER:-}" ]] && pi_model_args+=(--provider "$PI_SEE_SHELL_PROVIDER")
 [[ -n "${PI_SEE_SHELL_MODEL:-}" ]] && pi_model_args+=(--model "$PI_SEE_SHELL_MODEL")
 
+local -a pi_cmd=(  "pi"
+  --print -p
+  "${pi_model_args[@]}"
+  --no-extensions
+  -e "$(pi_see_shell_openrouter_preset_extension_path)"
+  --tools "read,web_search,url_extract,web_fetch,batch_web_fetch"
+  --no-skills
+  --no-context-files
+  --no-prompt-templates
+  --no-themes
+  --no-session
+  --offline
+  --thinking "${PI_SEE_SHELL_THINKING:-off}"
+  --system-prompt "$system_prompt"
+  "$*"
+ )
+
+pi_see_shell_debug_pi_command "${pi_cmd[@]}"
+
 local cmd
-cmd=$(pi --print -p \
-  "${pi_model_args[@]}" \
-  --no-tools \
-  --no-builtin-tools \
-  --no-extensions \
-  --no-skills \
-  --no-context-files \
-  --no-prompt-templates \
-  --no-themes \
-  --no-session \
-  --offline \
-  --thinking "${PI_SEE_SHELL_THINKING:-off}" \
-  --system-prompt "$system_prompt" \
-  "$*" 2>/dev/null)
+cmd="$("${pi_cmd[@]}" 2>/dev/null)"
 
 [[ $? -ne 0 || -z "$cmd" ]] && { echo "✗ Failed." >&2; exit 1; }
+cmd="$(printf '%s' "$cmd" | pi_see_shell_extract_command)"
 cmd="${cmd//\`/}"; cmd="${cmd//$'\n'/}"; cmd="${cmd//$'\r'/}"; cmd="${cmd## }"; cmd="${cmd%% }"
+[[ -z "$cmd" ]] && { echo "✗ Failed." >&2; exit 1; }
 
 echo -n "$cmd" | pbcopy
 print -P "%F{yellow}$cmd%f"

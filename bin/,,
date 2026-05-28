@@ -7,7 +7,11 @@ if ! command -v pi &>/dev/null; then
 fi
 [[ $# -eq 0 ]] && { echo "Usage: ,, <what to read, search, edit, or write>" >&2; exit 1; }
 
-local system_prompt="You are a precise file editing assistant on macOS. Perform exactly ONE bounded action pass. You may read files, search the web, edit files, or write files. Do not run shell commands. Do not chain multiple independent tasks. If you need to modify files, make the smallest safe edit and then stop."
+source "${0:A:h}/.pi-see-shell-question.zsh"
+
+local target_os
+target_os="$(pi_see_shell_target_os)"
+local system_prompt="You are a helpful, concise assistant running in a ${target_os} terminal. Answer clearly and accurately. You can read files from disk and search the web — use those when you need current or file-specific information."
 
 print -P ""
 print -P "%F{cyan}│ Edit action:%f %F{yellow}$*%f"
@@ -17,14 +21,23 @@ local pi_model_args=()
 [[ -n "${PI_SEE_SHELL_PROVIDER:-}" ]] && pi_model_args+=(--provider "$PI_SEE_SHELL_PROVIDER")
 [[ -n "${PI_SEE_SHELL_MODEL:-}" ]] && pi_model_args+=(--model "$PI_SEE_SHELL_MODEL")
 
-pi --print -p \
-  "${pi_model_args[@]}" \
-  --tools "read,web_search,url_extract,web_fetch,batch_web_fetch,edit,write" \
-  --no-skills \
-  --no-context-files \
-  --no-prompt-templates \
-  --no-themes \
-  --no-session \
-  --thinking "${PI_SEE_SHELL_THINKING:-off}" \
-  --system-prompt "$system_prompt" \
+local -a pi_cmd=(
+  pi
+  --print -p
+  "${pi_model_args[@]}"
+  --no-extensions
+  -e "$(pi_see_shell_openrouter_preset_extension_path)"
+  --tools "read,web_search,url_extract,web_fetch,batch_web_fetch,edit,write"
+  --no-skills
+  --no-context-files
+  --no-prompt-templates
+  --no-themes
+  --no-session
+  --thinking "${PI_SEE_SHELL_THINKING:-off}"
+  --system-prompt "$system_prompt"
   "$*"
+ )
+
+pi_see_shell_debug_pi_command "${pi_cmd[@]}"
+
+"${pi_cmd[@]}"

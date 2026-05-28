@@ -1,5 +1,5 @@
 # pi-see-shell zsh line editor helpers
-# Lets q/qq/qqq accept natural questions like: q what's the weather like?
+# Lets q/qq accept natural questions like: q what's the weather like?
 # without showing shell-escaped text in the terminal.
 
 _pi_see_shell_run_q_buffer() {
@@ -8,7 +8,7 @@ _pi_see_shell_run_q_buffer() {
   local line="$BUFFER"
   local cmd rest command_status
 
-  if [[ "$line" =~ '^([[:space:]]*)((\./)?q{1,3})([[:space:]]+)(.*)$' ]]; then
+  if [[ "$line" =~ '^([[:space:]]*)((\./)?q{1,2})([[:space:]]+)(.*)$' ]]; then
     cmd="$match[2]"
     rest="$match[5]"
 

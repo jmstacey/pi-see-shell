@@ -39,23 +39,33 @@ print -P "%F{cyan}│ Answer                                      │%f"
 print -P "%F{cyan}└─────────────────────────────────────────────┘%f"
 print -P ""
 
-answer="$(pi --print -p \
-  "${pi_model_args[@]}" \
-  --system-prompt "$system_prompt" \
-  --tools "read,web_search,url_extract,web_fetch,batch_web_fetch" \
-  --no-skills \
-  --no-context-files \
-  --no-prompt-templates \
-  --no-themes \
-  --no-session \
-  --thinking "${PI_SEE_SHELL_Q_THINKING:-${PI_SEE_SHELL_THINKING:-off}}" \
-  "$user_prompt")"
+local -a pi_cmd=(
+  pi
+  --print -p
+  "${pi_model_args[@]}"
+  --system-prompt "$system_prompt"
+  --no-extensions
+  -e "$(pi_see_shell_openrouter_preset_extension_path)"
+  --tools "read,web_search,url_extract,web_fetch,batch_web_fetch"
+  --no-skills
+  --no-context-files
+  --no-prompt-templates
+  --no-themes
+  --no-session
+  --thinking "${PI_SEE_SHELL_Q_THINKING:-${PI_SEE_SHELL_THINKING:-off}}"
+  "$user_prompt"
+ )
+
+pi_see_shell_debug_pi_command "${pi_cmd[@]}"
+
+answer="$("${pi_cmd[@]}")"
 ret=$?
 
 if [[ $ret -ne 0 ]]; then
   print -P "%F{red}✗ Failed.%f"
   exit $ret
 fi
+
 
 answer="$(printf '%s' "$answer" | pi_see_shell_plain_text)"
 

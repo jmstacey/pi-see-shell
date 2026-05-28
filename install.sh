@@ -15,11 +15,10 @@ cp "bin/," "$BIN_DIR/,"
 cp "bin/,," "$BIN_DIR/,,"
 cp "bin/q" "$BIN_DIR/q"
 cp "bin/qq" "$BIN_DIR/qq"
-cp "bin/qqq" "$BIN_DIR/qqq"
+rm -f "$BIN_DIR/qqq"
 cp "bin/.pi-see-shell-question.zsh" "$BIN_DIR/.pi-see-shell-question.zsh"
 cp "bin/.pi-see-shell-zle.zsh" "$BIN_DIR/.pi-see-shell-zle.zsh"
-chmod +x "$BIN_DIR/," "$BIN_DIR/,," "$BIN_DIR/q" "$BIN_DIR/qq" "$BIN_DIR/qqq"
-rm -f "$BIN_DIR/,,," "$BIN_DIR/?" "$BIN_DIR/??" "$BIN_DIR/???"
+chmod +x "$BIN_DIR/," "$BIN_DIR/,," "$BIN_DIR/q" "$BIN_DIR/qq"
 
 if ! grep -Fq 'export PATH="$HOME/.pi/bin:$PATH"' "$ZSHRC" 2>/dev/null; then
   {
@@ -31,8 +30,7 @@ if ! grep -Fq 'export PATH="$HOME/.pi/bin:$PATH"' "$ZSHRC" 2>/dev/null; then
     echo '# export PI_SEE_SHELL_MODEL=deepseek/deepseek-v4-flash'
     echo '# export PI_SEE_SHELL_THINKING=off'
     echo '# export PI_SEE_SHELL_Q_THINKING=off'
-    echo '# export PI_SEE_SHELL_GLOW_STYLE=notty'
-    echo '# export PI_SEE_SHELL_GLOW_WIDTH=88'
+    echo '# export PI_SEE_SHELL_DEBUG_PI_COMMAND=0'
     echo "# end pi-see-shell"
   } >> "$ZSHRC"
 fi
@@ -52,9 +50,11 @@ if ! grep -Fq "alias qq='noglob qq'" "$ZSHRC" 2>/dev/null; then
     echo "# pi-see-shell q glob protection"
     echo "alias q='noglob q'"
     echo "alias qq='noglob qq'"
-    echo "alias qqq='noglob qqq'"
     echo "# end pi-see-shell q glob protection"
   } >> "$ZSHRC"
+fi
+if grep -Fq "alias qqq='noglob qqq'" "$ZSHRC" 2>/dev/null; then
+  perl -0pi -e "s/^\s*alias qqq='noglob qqq'\n//m" "$ZSHRC"
 fi
 
 if ! grep -Fq 'PI_SEE_SHELL_SESSION_ID' "$ZSHRC" 2>/dev/null; then
@@ -74,18 +74,19 @@ if ! grep -Fq 'PI_SEE_SHELL_SESSION_ID' "$ZSHRC" 2>/dev/null; then
   } >> "$ZSHRC"
 fi
 
-echo "✓ Installed , ,, q qq and qqq to $BIN_DIR"
+echo "✓ Installed , ,, q and qq to $BIN_DIR"
 echo
 echo "Your shell will now get a per-window PI_SEE_SHELL_SESSION_ID."
 echo "Open a new terminal or source ~/.zshrc to activate changes in this shell."
-echo "The installer also adds zsh bindings so q/qq/qqq can accept apostrophes and question marks."
-echo "If glow is installed, q/qq/qqq output is rendered as terminal-formatted Markdown."
+echo "The installer also adds zsh bindings so q/qq can accept apostrophes and question marks."
+echo "If glow is installed, q/qq output is rendered as terminal-formatted Markdown."
 echo
 echo "Configuration environment variables:"
 echo "  PI_SEE_SHELL_PROVIDER   Optional Pi provider, e.g. openrouter"
 echo "  PI_SEE_SHELL_MODEL      Optional Pi model, e.g. deepseek/deepseek-v4-flash"
 echo "  PI_SEE_SHELL_THINKING     Optional thinking level for command/edit routes, defaults to off"
-echo "  PI_SEE_SHELL_Q_THINKING   Optional thinking level for q/qq/qqq, falls back to PI_SEE_SHELL_THINKING"
+echo "  PI_SEE_SHELL_Q_THINKING   Optional thinking level for q/qq, falls back to PI_SEE_SHELL_THINKING"
+echo "  PI_SEE_SHELL_DEBUG_PI_COMMAND   Optional debug logging of exact pi command, defaults to off"
 echo "  PI_SEE_SHELL_GLOW_STYLE   Optional glow style for rendered markdown, defaults to notty"
 echo "  PI_SEE_SHELL_GLOW_WIDTH   Optional glow width, defaults to terminal width"
 echo
@@ -94,5 +95,4 @@ echo "  export PI_SEE_SHELL_PROVIDER=openrouter"
 echo "  export PI_SEE_SHELL_MODEL=deepseek/deepseek-v4-flash"
 echo "  export PI_SEE_SHELL_THINKING=off"
 echo "  export PI_SEE_SHELL_Q_THINKING=off"
-echo "  export PI_SEE_SHELL_GLOW_STYLE=notty"
-echo "  export PI_SEE_SHELL_GLOW_WIDTH=88"
+echo "  export PI_SEE_SHELL_DEBUG_PI_COMMAND=0"

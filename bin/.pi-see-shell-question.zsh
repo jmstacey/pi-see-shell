@@ -33,13 +33,23 @@ pi_see_shell_ensure_session_dir() {
   mkdir -p "$(pi_see_shell_session_dir)"
 }
 
+pi_see_shell_target_os() {
+  case "$(uname -s 2>/dev/null)" in
+    Darwin) printf '%s\n' "macOS" ;;
+    Linux) printf '%s\n' "Linux" ;;
+    *) printf '%s\n' "unknown OS" ;;
+  esac
+}
+
 pi_see_shell_system_prompt() {
-  case "$1" in
+  local mode="${1:-concise}"
+  local target_os="${2:-$(pi_see_shell_target_os)}"
+  case "$mode" in
     exhaustive)
-      printf '%s\n' "You are a thorough, exhaustive research assistant in a macOS terminal. Give a comprehensive, detailed answer for terminal display. Use clean plain text, not Markdown. Avoid Markdown headings, tables, bold/italic markers, fenced code blocks, and decorative formatting. Short plain-text sections and simple hyphen bullets are okay when helpful. Cover edge cases, nuances, alternatives, and follow-on considerations. Use web search and file reading to gather full context before answering. Do not run bash commands."
+      printf '%s\n' "You are a thorough, exhaustive research assistant for ${target_os} terminal use. Give a comprehensive, detailed answer for terminal display. Use clean plain text, not Markdown. Avoid Markdown headings, tables, bold/italic markers, fenced code blocks, and decorative formatting. Short plain-text sections and simple hyphen bullets are okay when helpful. Cover edge cases, nuances, alternatives, and follow-on considerations. Use web search and file reading to gather full context before answering. Do not run bash commands."
       ;;
     *)
-      printf '%s\n' "You are a helpful, concise assistant in a macOS terminal. Answer clearly and accurately for terminal display. Use clean plain text, not Markdown. Avoid Markdown headings, tables, bold/italic markers, fenced code blocks, and decorative formatting. Short plain-text bullets are okay when useful. Use web search or file reading when needed. Do not run bash commands."
+      printf '%s\n' "You are a helpful, concise assistant for ${target_os} terminal use. Answer clearly and accurately for terminal display. Use clean plain text, not Markdown. Avoid Markdown headings, tables, bold/italic markers, fenced code blocks, and decorative formatting. Short plain-text bullets are okay when useful. Use web search or file reading when needed. Do not run bash commands."
       ;;
   esac
 }
@@ -114,6 +124,87 @@ PY
   return $plain_status
 }
 
+pi_see_shell_extract_command() {
+  local input_file
+  input_file="$(mktemp)"
+  cat > "$input_file"
+
+  python3 - "$input_file" <<'PY'
+import json, pathlib, re, sys
+
+text = pathlib.Path(sys.argv[1]).read_text(encoding='utf-8').strip()
+
+def emit(value: str):
+    value = value.strip()
+    if value:
+        print(value)
+    raise SystemExit(0)
+
+def strip_markers(t: str) -> str:
+    t = re.sub(r'^```[A-Za-z0-9_-]*\s*$', '', t, flags=re.MULTILINE)
+    t = t.replace('**', '')
+    t = t.replace('__', '')
+    t = re.sub(r'`([^`]+)`', r'\1', t)
+    return t.strip()
+
+def emit_json_command(blob: str) -> bool:
+    try:
+        data = json.loads(blob)
+    except Exception:
+        return False
+    if isinstance(data, dict):
+        cmd = data.get('command')
+        if isinstance(cmd, str) and cmd.strip():
+            emit(cmd)
+    return False
+
+emit_json_command(text)
+
+m = re.search(r'\{.*\}', text, flags=re.S)
+if m:
+    emit_json_command(m.group(0))
+
+for block in re.findall(r'```(?:bash|sh|zsh|shell)?\s*(.*?)```', text, flags=re.S | re.I):
+    lines = [line.strip() for line in block.splitlines() if line.strip()]
+    if lines:
+        emit(lines[0])
+
+text = strip_markers(text)
+lines = [line.strip() for line in text.splitlines() if line.strip()]
+
+label_prefixes = ('suggested command:', 'command:', 'answer:', 'result:', 'output:')
+command_starters = re.compile(r'^(?:\.{1,2}/|/|(?:cd|ls|find|grep|rg|du|git|curl|wget|awk|sed|perl|python3?|node|npm|pnpm|yarn|make|brew|docker|kubectl|ssh|scp|rsync|mv|cp|rm|mkdir|chmod|chown|tar|unzip|zip|open|pbcopy|printf|echo|cat|touch|xargs|sudo)\b)')
+
+for line in lines:
+    lower = line.lower()
+    matched_label = False
+    for prefix in label_prefixes:
+        if lower == prefix:
+            matched_label = True
+            break
+        if lower.startswith(prefix):
+            remainder = line[len(prefix):].strip(' :-')
+            if remainder:
+                emit(remainder)
+            matched_label = True
+            break
+    if matched_label:
+        continue
+
+    if command_starters.match(line):
+        emit(line)
+
+if lines:
+    emit(lines[0])
+
+print('')
+PY
+
+  local extract_status=$?
+  rm -f "$input_file"
+  return $extract_status
+}
+
 
 pi_see_shell_write_mode() {
   local mode="$1"
@@ -181,6 +272,53 @@ pi_see_shell_render_markdown() {
   fi
 }
 
+
+
+pi_see_shell_quote_double() {
+  local value="$1"
+  value="${(qqq)value}"
+  value="${value//!/\\!}"
+  printf '%s' "$value"
+}
+
+pi_see_shell_debug_pi_command() {
+  case "${PI_SEE_SHELL_DEBUG_PI_COMMAND:-}" in
+    1|true|TRUE|yes|YES|on|ON) ;;
+    *) return 0 ;;
+  esac
+
+  local -a args=("$@")
+  local output=""
+  local quote_next=0
+  local arg
+
+  for arg in "${args[@]}"; do
+    if (( quote_next )); then
+      output+="${output:+ }$(pi_see_shell_quote_double "$arg")"
+      quote_next=0
+      continue
+    fi
+
+    if [[ "$arg" == --system-prompt ]]; then
+      output+="${output:+ }$arg"
+      quote_next=1
+      continue
+    fi
+
+    if [[ -n "$arg" && "$arg" != *[!A-Za-z0-9_./:@%+=,~-]* ]]; then
+      output+="${output:+ }$arg"
+    else
+      output+="${output:+ }$(pi_see_shell_quote_double "$arg")"
+    fi
+  done
+
+  print -u2 -r -- "$output"
+}
+
+
+pi_see_shell_openrouter_preset_extension_path() {
+  printf '%s\n' "$HOME/.pi/agent/extensions/openrouter-preset.ts"
+}
 
 pi_see_shell_followup_prompt() {
   local question="$1"
