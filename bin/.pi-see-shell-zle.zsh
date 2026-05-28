@@ -19,9 +19,11 @@ _pi_see_shell_run_q_buffer() {
     BUFFER=""
     CURSOR=0
 
-    # Flush the current edit line, move to command output, then invoke directly.
+    # Flush the current edit line, then echo the clean command so it remains
+    # visible in the terminal without shell-escaped characters.
     zle -I
-    print -r -- ""
+    print -P -n -- "${PROMPT:-%# }"
+    print -r -- "$line"
     "$cmd" "$rest"
     status=$?
     print -r -- ""
