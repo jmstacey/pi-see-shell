@@ -222,26 +222,6 @@ tmp.replace(path)
 PY
 }
 
-pi_see_shell_read_mode() {
-  local state_file
-  state_file="$(pi_see_shell_meta_path)"
-  if [[ ! -f "$state_file" ]]; then
-    printf '%s\n' "concise"
-    return
-  fi
-
-  python3 - "$state_file" <<'PY'
-import json, pathlib, sys
-path = pathlib.Path(sys.argv[1])
-try:
-    data = json.loads(path.read_text(encoding='utf-8'))
-except Exception:
-    print('concise')
-    raise SystemExit(0)
-mode = data.get('mode', 'concise') if isinstance(data, dict) else 'concise'
-print(mode if mode in {'concise', 'exhaustive'} else 'concise')
-PY
-}
 
 pi_see_shell_reset_transcript() {
   local transcript_file
@@ -258,19 +238,6 @@ pi_see_shell_append_turn() {
   python3 -c 'import json, pathlib, sys; path = pathlib.Path(sys.argv[1]); role = sys.argv[2]; content = sys.stdin.read(); path.parent.mkdir(parents=True, exist_ok=True); path.open("a", encoding="utf-8").write(json.dumps({"role": role, "content": content}, ensure_ascii=False) + "\n")' "$transcript_file" "$role"
 }
 
-pi_see_shell_render_markdown() {
-  if [[ -t 1 ]] && command -v glow >/dev/null 2>&1; then
-    local style="${PI_SEE_SHELL_GLOW_STYLE:-notty}"
-    local width="${PI_SEE_SHELL_GLOW_WIDTH:-}"
-    if [[ -z "$width" ]] && command -v tput >/dev/null 2>&1; then
-      width="$(tput cols 2>/dev/null || true)"
-    fi
-    [[ -z "$width" ]] && width=88
-    glow --style "$style" --width "$width" -
-  else
-    cat
-  fi
-}
 
 
 
@@ -316,37 +283,43 @@ pi_see_shell_debug_pi_command() {
 }
 
 
+pi_see_shell_build_pi_cmd() {
+  local mode="$1"
+  local system_prompt="$2"
+  local thinking="$3"
+  local prompt="$4"
+  shift 4
+
+  local -a extra_args=("$@")
+  local -a pi_model_args=()
+  [[ -n "${PI_SEE_SHELL_PROVIDER:-}" ]] && pi_model_args+=(--provider "$PI_SEE_SHELL_PROVIDER")
+  [[ -n "${PI_SEE_SHELL_MODEL:-}" ]] && pi_model_args+=(--model "$PI_SEE_SHELL_MODEL")
+  if [[ "$mode" == question && -n "${PI_SEE_SHELL_MODEL:-}" ]]; then
+    local pi_models_pattern="$PI_SEE_SHELL_MODEL"
+    if [[ -n "${PI_SEE_SHELL_PROVIDER:-}" && "$pi_models_pattern" != "$PI_SEE_SHELL_PROVIDER/"* ]]; then
+      pi_models_pattern="$PI_SEE_SHELL_PROVIDER/$pi_models_pattern"
+    fi
+    pi_model_args+=(--models "$pi_models_pattern")
+  fi
+
+  reply=(
+    pi
+    --print -p
+    "${pi_model_args[@]}"
+    --system-prompt "$system_prompt"
+    --no-extensions
+    -e "$(pi_see_shell_openrouter_preset_extension_path)"
+    --tools "read,web_search,url_extract,web_fetch,batch_web_fetch"
+    --no-skills
+    --no-context-files
+    --no-prompt-templates
+    --no-themes
+    --no-session
+    "${extra_args[@]}"
+    --thinking "$thinking"
+    "$prompt"
+  )
+}
 pi_see_shell_openrouter_preset_extension_path() {
   printf '%s\n' "$HOME/.pi/agent/extensions/openrouter-preset.ts"
-}
-
-pi_see_shell_followup_prompt() {
-  local question="$1"
-  local transcript_file
-  transcript_file="$(pi_see_shell_transcript_path)"
-  python3 - "$transcript_file" "$question" <<'PY'
-import json, pathlib, sys
-path = pathlib.Path(sys.argv[1])
-question = sys.argv[2]
-turns = []
-if path.exists():
-    for line in path.read_text(encoding='utf-8').splitlines():
-        try:
-            turn = json.loads(line)
-        except Exception:
-            continue
-        if isinstance(turn, dict) and turn.get('role') in {'user', 'assistant'} and turn.get('content'):
-            turns.append(turn)
-if not turns:
-    print(question)
-else:
-    transcript = '\n\n'.join(f"{turn['role']}:\n{turn['content']}" for turn in turns)
-    print('Continue the previous shell discussion.')
-    print()
-    print('Transcript so far:')
-    print(transcript)
-    print()
-    print('Follow-up question:')
-    print(question)
-PY
 }

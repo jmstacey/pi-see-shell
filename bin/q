@@ -12,47 +12,17 @@ pi_see_shell_write_mode concise
 pi_see_shell_reset_transcript
 printf '%s' "$*" | pi_see_shell_append_turn user
 
-local system_prompt
-system_prompt="$(pi_see_shell_system_prompt concise)"
+local -a reply
+local answer ret
 
-print -P ""
-print -P "%F{cyan}│ Answer:"
-print -P ""
+pi_see_shell_build_pi_cmd question \
+  "$(pi_see_shell_system_prompt concise)" \
+  "${PI_SEE_SHELL_Q_THINKING:-${PI_SEE_SHELL_THINKING:-off}}" \
+  "$*"
 
-local pi_model_args=()
-[[ -n "${PI_SEE_SHELL_PROVIDER:-}" ]] && pi_model_args+=(--provider "$PI_SEE_SHELL_PROVIDER")
-[[ -n "${PI_SEE_SHELL_MODEL:-}" ]] && pi_model_args+=(--model "$PI_SEE_SHELL_MODEL")
-if [[ -n "${PI_SEE_SHELL_MODEL:-}" ]]; then
-  local pi_models_pattern="$PI_SEE_SHELL_MODEL"
-  if [[ -n "${PI_SEE_SHELL_PROVIDER:-}" && "$pi_models_pattern" != "$PI_SEE_SHELL_PROVIDER/"* ]]; then
-    pi_models_pattern="$PI_SEE_SHELL_PROVIDER/$pi_models_pattern"
-  fi
-  pi_model_args+=(--models "$pi_models_pattern")
-fi
+pi_see_shell_debug_pi_command "${reply[@]}"
 
-local user_prompt answer ret
-user_prompt="$*"
-
-local -a pi_cmd=(
-  pi
-  --print -p
-  "${pi_model_args[@]}"
-  --system-prompt "$system_prompt"
-  --no-extensions
-  -e "$(pi_see_shell_openrouter_preset_extension_path)"
-  --tools "read,web_search,url_extract,web_fetch,batch_web_fetch"
-  --no-skills
-  --no-context-files
-  --no-prompt-templates
-  --no-themes
-  --no-session
-  --thinking "${PI_SEE_SHELL_Q_THINKING:-${PI_SEE_SHELL_THINKING:-off}}"
-  "$user_prompt"
- )
-
-pi_see_shell_debug_pi_command "${pi_cmd[@]}"
-
-answer="$("${pi_cmd[@]}")"
+answer="$(${reply[@]})"
 ret=$?
 
 if [[ $ret -ne 0 ]]; then
