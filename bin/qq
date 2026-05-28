@@ -1,17 +1,17 @@
 #!/usr/bin/env zsh
-# Continue the previous question in the same shell session.
+# qq — continue the previous q answer in the same shell session.
 
 if ! command -v pi &>/dev/null; then
   echo "✗ 'pi' not found." >&2; exit 1
 fi
-[[ $# -eq 0 ]] && { echo "Usage: ?? <follow-up question>" >&2; exit 1; }
+[[ $# -eq 0 ]] && { echo "Usage: qq <follow-up question>" >&2; exit 1; }
 
 source "${0:A:h}/.pi-see-shell-question.zsh"
 
 local transcript_file
 transcript_file="$(pi_see_shell_transcript_path)"
 if [[ ! -f "$transcript_file" ]]; then
-  print -P "%F{red}✗ No active question. Start one with: ? <question>%f" >&2
+  print -P "%F{red}✗ No active question. Start one with: q <question>%f" >&2
   exit 1
 fi
 
@@ -27,7 +27,7 @@ prompt="$(pi_see_shell_followup_prompt "$*")"
 printf '%s' "$*" | pi_see_shell_append_turn user
 
 print -P ""
-print -P "%F{cyan}│ ??%f %F{yellow}$*%f"
+print -P "%F{cyan}│ Follow-up:%f %F{yellow}$*%f"
 print -P ""
 
 answer="$(pi --print -p \

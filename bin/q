@@ -1,10 +1,10 @@
 #!/usr/bin/env zsh
-# Ask a fresh read/web question.
+# q — ask a question and get an AI-powered answer.
 
 if ! command -v pi &>/dev/null; then
   echo "✗ 'pi' not found." >&2; exit 1
 fi
-[[ $# -eq 0 ]] && { echo "Usage: ? <question>" >&2; exit 1; }
+[[ $# -eq 0 ]] && { echo "Usage: q <question>" >&2; exit 1; }
 
 source "${0:A:h}/.pi-see-shell-question.zsh"
 
@@ -17,7 +17,7 @@ system_prompt="$(pi_see_shell_system_prompt concise)"
 
 print -P ""
 print -P "%F{cyan}┌─────────────────────────────────────────────%f"
-print -P "%F{cyan}│ ?%f %F{yellow}$*%f"
+print -P "%F{cyan}│ Question:%f %F{yellow}$*%f"
 print -P "%F{cyan}└─────────────────────────────────────────────%f"
 print -P ""
 

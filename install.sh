@@ -13,12 +13,12 @@ mkdir -p "$BIN_DIR"
 
 cp "bin/," "$BIN_DIR/,"
 cp "bin/,," "$BIN_DIR/,,"
-cp "bin/?" "$BIN_DIR/?"
-cp "bin/??" "$BIN_DIR/??"
-cp "bin/???" "$BIN_DIR/???"
+cp "bin/q" "$BIN_DIR/q"
+cp "bin/qq" "$BIN_DIR/qq"
+cp "bin/qqq" "$BIN_DIR/qqq"
 cp "bin/.pi-see-shell-question.zsh" "$BIN_DIR/.pi-see-shell-question.zsh"
-chmod +x "$BIN_DIR/," "$BIN_DIR/,," "$BIN_DIR/?" "$BIN_DIR/??" "$BIN_DIR/???"
-rm -f "$BIN_DIR/,,,"
+chmod +x "$BIN_DIR/," "$BIN_DIR/,," "$BIN_DIR/q" "$BIN_DIR/qq" "$BIN_DIR/qqq"
+rm -f "$BIN_DIR/,,," "$BIN_DIR/?" "$BIN_DIR/??" "$BIN_DIR/???"
 
 if ! grep -Fq 'export PATH="$HOME/.pi/bin:$PATH"' "$ZSHRC" 2>/dev/null; then
   {
@@ -50,7 +50,7 @@ if ! grep -Fq 'PI_SEE_SHELL_SESSION_ID' "$ZSHRC" 2>/dev/null; then
   } >> "$ZSHRC"
 fi
 
-echo "✓ Installed , ,, ? ?? and ??? to $BIN_DIR"
+echo "✓ Installed , ,, q qq and qqq to $BIN_DIR"
 echo
 echo "Your shell will now get a per-window PI_SEE_SHELL_SESSION_ID."
 echo "Open a new terminal or source ~/.zshrc to activate changes in this shell."
