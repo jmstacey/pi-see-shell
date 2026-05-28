@@ -44,6 +44,77 @@ pi_see_shell_system_prompt() {
   esac
 }
 
+pi_see_shell_plain_text() {
+  local input_file
+  input_file="$(mktemp)"
+  cat > "$input_file"
+
+  python3 - "$input_file" <<'PY'
+import pathlib, re, sys
+
+text = pathlib.Path(sys.argv[1]).read_text(encoding='utf-8')
+
+# Remove fenced-code markers but keep the content between them.
+text = re.sub(r'^```[A-Za-z0-9_-]*\s*$', '', text, flags=re.MULTILINE)
+
+# Remove common inline Markdown markers.
+text = text.replace('**', '')
+text = text.replace('__', '')
+text = re.sub(r'`([^`]+)`', r'\1', text)
+
+lines = text.splitlines()
+out = []
+pending_table_header = None
+in_table = False
+
+def table_cells(line: str):
+    stripped = line.strip()
+    if not (stripped.startswith('|') and stripped.endswith('|')):
+        return None
+    return [cell.strip() for cell in stripped.strip('|').split('|')]
+
+def is_separator(cells):
+    return bool(cells) and all(re.fullmatch(r':?-{3,}:?', cell.replace(' ', '')) for cell in cells)
+
+i = 0
+while i < len(lines):
+    line = lines[i]
+    line = re.sub(r'^\s{0,3}#{1,6}\s+', '', line)
+
+    cells = table_cells(line)
+    if cells is not None:
+        next_cells = table_cells(lines[i + 1]) if i + 1 < len(lines) else None
+        if next_cells is not None and is_separator(next_cells):
+            pending_table_header = cells
+            in_table = True
+            i += 2
+            continue
+        if in_table and pending_table_header and len(cells) == len(pending_table_header):
+            out.append('- ' + '; '.join(f'{h}: {c}' for h, c in zip(pending_table_header, cells)))
+            i += 1
+            continue
+        out.append('- ' + '; '.join(cells))
+        i += 1
+        continue
+
+    if in_table and line.strip() == '':
+        in_table = False
+        pending_table_header = None
+
+    out.append(line)
+    i += 1
+
+result = '\n'.join(out)
+result = re.sub(r'\n{3,}', '\n\n', result).strip()
+print(result)
+PY
+
+  local plain_status=$?
+  rm -f "$input_file"
+  return $plain_status
+}
+
+
 pi_see_shell_write_mode() {
   local mode="$1"
   local state_file

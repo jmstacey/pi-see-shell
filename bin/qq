@@ -57,5 +57,7 @@ if [[ $ret -ne 0 ]]; then
   exit $ret
 fi
 
+answer="$(printf '%s' "$answer" | pi_see_shell_plain_text)"
+
 printf '%s' "$answer" | pi_see_shell_append_turn assistant
-printf '%s\n' "$answer" | pi_see_shell_render_markdown
+print -r -- "$answer"
