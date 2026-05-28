@@ -20,13 +20,11 @@ local pi_model_args=()
 pi --print -p \
   "${pi_model_args[@]}" \
   --tools "read,web_search,url_extract,web_fetch,batch_web_fetch,edit,write" \
-  --no-extensions \
   --no-skills \
   --no-context-files \
   --no-prompt-templates \
   --no-themes \
   --no-session \
-  --offline \
   --thinking "${PI_SEE_SHELL_THINKING:-off}" \
   --system-prompt "$system_prompt" \
   "$*"

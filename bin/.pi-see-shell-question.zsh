@@ -46,10 +46,10 @@ pi_see_shell_system_prompt() {
 
 pi_see_shell_write_mode() {
   local mode="$1"
-  local path
-  path="$(pi_see_shell_meta_path)"
+  local state_file
+  state_file="$(pi_see_shell_meta_path)"
   pi_see_shell_ensure_session_dir
-  python3 - "$path" "$mode" <<'PY'
+  python3 - "$state_file" "$mode" <<'PY'
 import json, pathlib, sys
 path = pathlib.Path(sys.argv[1])
 mode = sys.argv[2]
@@ -61,14 +61,14 @@ PY
 }
 
 pi_see_shell_read_mode() {
-  local path
-  path="$(pi_see_shell_meta_path)"
-  if [[ ! -f "$path" ]]; then
+  local state_file
+  state_file="$(pi_see_shell_meta_path)"
+  if [[ ! -f "$state_file" ]]; then
     printf '%s\n' "concise"
     return
   fi
 
-  python3 - "$path" <<'PY'
+  python3 - "$state_file" <<'PY'
 import json, pathlib, sys
 path = pathlib.Path(sys.argv[1])
 try:
@@ -82,25 +82,25 @@ PY
 }
 
 pi_see_shell_reset_transcript() {
-  local path
-  path="$(pi_see_shell_transcript_path)"
+  local transcript_file
+  transcript_file="$(pi_see_shell_transcript_path)"
   pi_see_shell_ensure_session_dir
-  : > "$path"
+  : > "$transcript_file"
 }
 
 pi_see_shell_append_turn() {
   local role="$1"
-  local path
-  path="$(pi_see_shell_transcript_path)"
+  local transcript_file
+  transcript_file="$(pi_see_shell_transcript_path)"
   pi_see_shell_ensure_session_dir
-  python3 -c 'import json, pathlib, sys; path = pathlib.Path(sys.argv[1]); role = sys.argv[2]; content = sys.stdin.read(); path.parent.mkdir(parents=True, exist_ok=True); path.open("a", encoding="utf-8").write(json.dumps({"role": role, "content": content}, ensure_ascii=False) + "\n")' "$path" "$role"
+  python3 -c 'import json, pathlib, sys; path = pathlib.Path(sys.argv[1]); role = sys.argv[2]; content = sys.stdin.read(); path.parent.mkdir(parents=True, exist_ok=True); path.open("a", encoding="utf-8").write(json.dumps({"role": role, "content": content}, ensure_ascii=False) + "\n")' "$transcript_file" "$role"
 }
 
 pi_see_shell_followup_prompt() {
   local question="$1"
-  local path
-  path="$(pi_see_shell_transcript_path)"
-  python3 - "$path" "$question" <<'PY'
+  local transcript_file
+  transcript_file="$(pi_see_shell_transcript_path)"
+  python3 - "$transcript_file" "$question" <<'PY'
 import json, pathlib, sys
 path = pathlib.Path(sys.argv[1])
 question = sys.argv[2]

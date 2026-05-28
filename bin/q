@@ -31,13 +31,11 @@ answer="$(pi --print -p \
   "${pi_model_args[@]}" \
   --system-prompt "$system_prompt" \
   --tools "read,web_search,url_extract,web_fetch,batch_web_fetch" \
-  --no-extensions \
   --no-skills \
   --no-context-files \
   --no-prompt-templates \
   --no-themes \
   --no-session \
-  --offline \
   --thinking "${PI_SEE_SHELL_THINKING:-off}" \
   "$prompt")"
 ret=$?
