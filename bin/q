@@ -16,9 +16,9 @@ local system_prompt
 system_prompt="$(pi_see_shell_system_prompt concise)"
 
 print -P ""
-print -P "%F{cyan}┌─────────────────────────────────────────────%f"
-print -P "%F{cyan}│ Question:%f %F{yellow}$*%f"
-print -P "%F{cyan}└─────────────────────────────────────────────%f"
+print -P "%F{cyan}┌─────────────────────────────────────────────┐%f"
+print -P "%F{cyan}│ Answer                                      │%f"
+print -P "%F{cyan}└─────────────────────────────────────────────┘%f"
 print -P ""
 
 local pi_model_args=()
@@ -32,8 +32,8 @@ if [[ -n "${PI_SEE_SHELL_MODEL:-}" ]]; then
   pi_model_args+=(--models "$pi_models_pattern")
 fi
 
-local prompt answer ret
-prompt="$*"
+local user_prompt answer ret
+user_prompt="$*"
 answer="$(pi --print -p \
   "${pi_model_args[@]}" \
   --system-prompt "$system_prompt" \
@@ -44,7 +44,7 @@ answer="$(pi --print -p \
   --no-themes \
   --no-session \
   --thinking "${PI_SEE_SHELL_Q_THINKING:-${PI_SEE_SHELL_THINKING:-off}}" \
-  "$prompt")"
+  "$user_prompt")"
 ret=$?
 
 if [[ $ret -ne 0 ]]; then
