@@ -1,36 +1,39 @@
-pi-see-shell
+# pi-see-shell
 
 A small zsh bridge for Pi.
 
-What it does
+## What it does
 - `q` asks Pi a question and prints the answer in your terminal.
-- `,` asks Pi for one shell command, copies it, and does not run it.
-- `q` gets a zsh binding so natural text with apostrophes and question marks works cleanly.
-- Everything stays lean. No sessions. No context files. No skills. No prompt templates.
+- `,` asks Pi for one shell command, copies it to the clipboard, and does not run it.
+- The installer also adds a zsh binding so `q` handles apostrophes and question marks cleanly.
+- Pi subprocesses stay lean: no skills, extensions, sessions, or prompt templates.
 
-Install
+## Install
 1. Make sure `pi` is installed and available on your PATH.
-2. Run `./install.sh` from this repo.
-3. Open a new terminal or source `~/.zshrc`.
+2. Clone this repo.
+3. Run `./install.sh`.
+4. Open a new terminal or source `~/.zshrc`.
 
-The installer copies the scripts into `~/.pi/bin`, adds that directory to PATH, sources the zle helper, and sets a per-window `PI_SEE_SHELL_SESSION_ID`.
+The installer copies the scripts into `~/.pi/bin`, adds that directory to PATH, sources the ZLE helper, and sets a per-window `PI_SEE_SHELL_SESSION_ID`.
 
-Use
-- `q what's the fastest way to rename these files?`
-- `, show me a command to list hidden files`
+## Use
+- `q what's the weather in Denver, Colorado?`
+- `, list files sorted by size with human-readable output`
 
-Configure
-- `PI_SEE_SHELL_PROVIDER`
-- `PI_SEE_SHELL_MODEL`
-- `PI_SEE_SHELL_THINKING`
-- `PI_SEE_SHELL_Q_THINKING`
-- `PI_SEE_SHELL_DEBUG_PI_COMMAND`
+## Configure
+```zsh
+export PI_SEE_SHELL_PROVIDER=openrouter
+export PI_SEE_SHELL_MODEL=deepseek/deepseek-v4-flash
+export PI_SEE_SHELL_THINKING=off
+export PI_SEE_SHELL_Q_THINKING=off
+export PI_SEE_SHELL_DEBUG_PI_COMMAND=0
+```
 
-Notes
-- `,` is suggestion only.
-- The `,` route uses `pbcopy`, so macOS is the intended home.
+## Notes
+- `,` is suggestion only and does not execute.
+- `,` uses `pbcopy`, so macOS is the intended environment.
 - Output is kept plain and terminal-friendly.
 
-Inspiration
+## Inspiration
 - https://z3ugma.github.io/2026/05/25/a-comma-and-a-question-mark/
 - https://www.thetypicalset.com/blog/a-comma-and-a-question-mark
