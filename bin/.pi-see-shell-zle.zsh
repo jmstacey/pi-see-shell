@@ -1,26 +1,44 @@
 # pi-see-shell zsh line editor helpers
 # Lets q/qq/qqq accept natural questions like: q what's the weather like?
-# by quoting the question text before zsh parses apostrophes or glob chars.
+# without showing shell-escaped text in the terminal.
 
-_pi_see_shell_quote_q_buffer() {
+_pi_see_shell_run_q_buffer() {
   emulate -L zsh
 
   local line="$BUFFER"
-  local leading cmd sep rest
+  local cmd rest status
 
   if [[ "$line" =~ '^([[:space:]]*)((\./)?q{1,3})([[:space:]]+)(.*)$' ]]; then
-    leading="$match[1]"
     cmd="$match[2]"
-    sep="$match[4]"
     rest="$match[5]"
 
-    [[ -z "$rest" ]] && return 0
-    BUFFER="${leading}${cmd}${sep}${(q)rest}"
+    # Preserve the clean, natural command in shell history.
+    print -s -- "$line"
+
+    # Clear the edit buffer so zsh does not try to parse apostrophes or globs.
+    BUFFER=""
+    CURSOR=0
+
+    # Flush the current edit line, move to command output, then invoke directly.
+    zle -I
+    print -r -- ""
+    "$cmd" "$rest"
+    status=$?
+    print -r -- ""
+
+    # Show a fresh prompt without feeding the original buffer to zsh parsing.
+    zle reset-prompt
+    return $status
   fi
+
+  return 1
 }
 
 _pi_see_shell_accept_line() {
-  _pi_see_shell_quote_q_buffer
+  if _pi_see_shell_run_q_buffer; then
+    return
+  fi
+
   zle _pi_see_shell_orig_accept_line
 }
 
