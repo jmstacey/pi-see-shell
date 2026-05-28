@@ -29,6 +29,7 @@ if ! grep -Fq 'export PATH="$HOME/.pi/bin:$PATH"' "$ZSHRC" 2>/dev/null; then
     echo '# export PI_SEE_SHELL_PROVIDER=openrouter'
     echo '# export PI_SEE_SHELL_MODEL=deepseek/deepseek-v4-flash'
     echo '# export PI_SEE_SHELL_THINKING=off'
+    echo '# export PI_SEE_SHELL_Q_THINKING=off'
     echo "# end pi-see-shell"
   } >> "$ZSHRC"
 fi
@@ -58,9 +59,11 @@ echo
 echo "Configuration environment variables:"
 echo "  PI_SEE_SHELL_PROVIDER   Optional Pi provider, e.g. openrouter"
 echo "  PI_SEE_SHELL_MODEL      Optional Pi model, e.g. deepseek/deepseek-v4-flash"
-echo "  PI_SEE_SHELL_THINKING   Optional thinking level, defaults to off"
+echo "  PI_SEE_SHELL_THINKING     Optional thinking level for command/edit routes, defaults to off"
+echo "  PI_SEE_SHELL_Q_THINKING   Optional thinking level for q/qq/qqq, falls back to PI_SEE_SHELL_THINKING"
 echo
 echo "Examples for ~/.zshrc:"
 echo "  export PI_SEE_SHELL_PROVIDER=openrouter"
 echo "  export PI_SEE_SHELL_MODEL=deepseek/deepseek-v4-flash"
 echo "  export PI_SEE_SHELL_THINKING=off"
+echo "  export PI_SEE_SHELL_Q_THINKING=off"

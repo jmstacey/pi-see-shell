@@ -36,7 +36,7 @@ answer="$(pi --print -p \
   --no-prompt-templates \
   --no-themes \
   --no-session \
-  --thinking "${PI_SEE_SHELL_THINKING:-off}" \
+  --thinking "${PI_SEE_SHELL_Q_THINKING:-${PI_SEE_SHELL_THINKING:-off}}" \
   "$prompt")"
 ret=$?
 
