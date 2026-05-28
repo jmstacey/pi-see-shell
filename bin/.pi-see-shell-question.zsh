@@ -96,6 +96,21 @@ pi_see_shell_append_turn() {
   python3 -c 'import json, pathlib, sys; path = pathlib.Path(sys.argv[1]); role = sys.argv[2]; content = sys.stdin.read(); path.parent.mkdir(parents=True, exist_ok=True); path.open("a", encoding="utf-8").write(json.dumps({"role": role, "content": content}, ensure_ascii=False) + "\n")' "$transcript_file" "$role"
 }
 
+pi_see_shell_render_markdown() {
+  if [[ -t 1 ]] && command -v glow >/dev/null 2>&1; then
+    local style="${PI_SEE_SHELL_GLOW_STYLE:-notty}"
+    local width="${PI_SEE_SHELL_GLOW_WIDTH:-}"
+    if [[ -z "$width" ]] && command -v tput >/dev/null 2>&1; then
+      width="$(tput cols 2>/dev/null || true)"
+    fi
+    [[ -z "$width" ]] && width=88
+    glow --style "$style" --width "$width" -
+  else
+    cat
+  fi
+}
+
+
 pi_see_shell_followup_prompt() {
   local question="$1"
   local transcript_file

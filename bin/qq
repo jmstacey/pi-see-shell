@@ -58,4 +58,4 @@ if [[ $ret -ne 0 ]]; then
 fi
 
 printf '%s' "$answer" | pi_see_shell_append_turn assistant
-print -r -- "$answer"
+printf '%s\n' "$answer" | pi_see_shell_render_markdown

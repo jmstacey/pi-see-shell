@@ -31,6 +31,8 @@ if ! grep -Fq 'export PATH="$HOME/.pi/bin:$PATH"' "$ZSHRC" 2>/dev/null; then
     echo '# export PI_SEE_SHELL_MODEL=deepseek/deepseek-v4-flash'
     echo '# export PI_SEE_SHELL_THINKING=off'
     echo '# export PI_SEE_SHELL_Q_THINKING=off'
+    echo '# export PI_SEE_SHELL_GLOW_STYLE=notty'
+    echo '# export PI_SEE_SHELL_GLOW_WIDTH=88'
     echo "# end pi-see-shell"
   } >> "$ZSHRC"
 fi
@@ -77,15 +79,20 @@ echo
 echo "Your shell will now get a per-window PI_SEE_SHELL_SESSION_ID."
 echo "Open a new terminal or source ~/.zshrc to activate changes in this shell."
 echo "The installer also adds zsh bindings so q/qq/qqq can accept apostrophes and question marks."
+echo "If glow is installed, q/qq/qqq output is rendered as terminal-formatted Markdown."
 echo
 echo "Configuration environment variables:"
 echo "  PI_SEE_SHELL_PROVIDER   Optional Pi provider, e.g. openrouter"
 echo "  PI_SEE_SHELL_MODEL      Optional Pi model, e.g. deepseek/deepseek-v4-flash"
 echo "  PI_SEE_SHELL_THINKING     Optional thinking level for command/edit routes, defaults to off"
 echo "  PI_SEE_SHELL_Q_THINKING   Optional thinking level for q/qq/qqq, falls back to PI_SEE_SHELL_THINKING"
+echo "  PI_SEE_SHELL_GLOW_STYLE   Optional glow style for rendered markdown, defaults to notty"
+echo "  PI_SEE_SHELL_GLOW_WIDTH   Optional glow width, defaults to terminal width"
 echo
 echo "Examples for ~/.zshrc:"
 echo "  export PI_SEE_SHELL_PROVIDER=openrouter"
 echo "  export PI_SEE_SHELL_MODEL=deepseek/deepseek-v4-flash"
 echo "  export PI_SEE_SHELL_THINKING=off"
 echo "  export PI_SEE_SHELL_Q_THINKING=off"
+echo "  export PI_SEE_SHELL_GLOW_STYLE=notty"
+echo "  export PI_SEE_SHELL_GLOW_WIDTH=88"
